@@ -8,7 +8,7 @@ Django 5 backend application for Artvinci, configured to use MongoDB as the data
 - MongoDB installed and running locally
 - MongoDB Compass (optional, for database visualization)
 
-## 🚀 Setup Instructions
+## 🚀 Quick Start
 
 ### 1. Clone the Repository
 
@@ -34,7 +34,7 @@ pip install -r requirements.txt
 
 ### 4. Verify MongoDB is Running
 
-Make sure MongoDB is running on your local machine at `localhost:27017`. You can check this using:
+Make sure MongoDB is running on your local machine at `localhost:27017`:
 
 ```bash
 # Check if MongoDB is running
@@ -46,22 +46,15 @@ brew services start mongodb-community  # On macOS with Homebrew
 sudo systemctl start mongod  # On Linux
 ```
 
-### 5. Run Migrations
-
-```bash
-python manage.py makemigrations
-python manage.py migrate
-```
-
-This will create the `artvinci_db` database in MongoDB and set up all necessary collections.
-
-### 6. Run the Development Server
+### 5. Run the Development Server
 
 ```bash
 python manage.py runserver
 ```
 
 The server will start at `http://localhost:8000`
+
+**Note:** The database `artvinci_db` will be created automatically when you first write data to it. No migrations are needed at this stage
 
 ## 🗄️ MongoDB Configuration
 
@@ -94,7 +87,7 @@ DATABASES = {
 
 ## 🧪 Testing the MongoDB Connection
 
-You can test the connection using the Django shell:
+You can verify the connection using the Django shell:
 
 ```bash
 python manage.py shell
@@ -103,23 +96,18 @@ python manage.py shell
 Then run:
 
 ```python
-from core.models import Artist
+from django.conf import settings
+from pymongo import MongoClient
 
-# Create a new artist
-artist = Artist(
-    name='Pablo Picasso',
-    country='Spain',
-    art_style='Cubism'
-)
-artist.save()
+# Check Django settings
+print(f"Database: {settings.DATABASES['default']['NAME']}")
+print(f"Host: {settings.DATABASES['default']['CLIENT']['host']}")
+print(f"Port: {settings.DATABASES['default']['CLIENT']['port']}")
 
-# Query all artists
-artists = Artist.objects.all()
-for artist in artists:
-    print(f"{artist.name} - {artist.country} - {artist.art_style}")
-
-# Get count of artists
-print(f"Total artists: {Artist.objects.count()}")
+# Test MongoDB connection
+client = MongoClient('localhost', 27017)
+print(f"Connected: {client.server_info() is not None}")
+print(f"Available databases: {client.list_database_names()}")
 ```
 
 ## 📦 Dependencies
@@ -148,20 +136,31 @@ artvinci-backend/
 └── README.md             # This file
 ```
 
-## 📝 Models
+## 📝 Creating Your First Model
 
-### Artist Model
+The project is set up with a clean slate. To create your first model:
 
-Located in `core/models.py`:
+1. Define your model in `core/models.py`:
 
 ```python
-class Artist(models.Model):
+from django.db import models
+
+class YourModel(models.Model):
     name = models.CharField(max_length=200)
-    country = models.CharField(max_length=100)
-    art_style = models.CharField(max_length=100)
+    # Add your fields here
+    
+    def __str__(self):
+        return self.name
 ```
 
-This model is stored in the `artists` collection in MongoDB.
+2. Create and run migrations:
+
+```bash
+python manage.py makemigrations
+python manage.py migrate
+```
+
+3. Your data will be automatically stored in MongoDB collections
 
 ## 🔧 Troubleshooting
 
@@ -202,31 +201,35 @@ If you get `ModuleNotFoundError`, ensure all dependencies are installed:
 pip install -r requirements.txt
 ```
 
-## 🌐 API Development
+## 🌐 Building Your API
 
-To add REST API endpoints, you can use Django REST Framework (already included):
+The project includes Django REST Framework. To create API endpoints:
+
+1. **Create a serializer** in `core/serializers.py`:
 
 ```python
-# In core/serializers.py
 from rest_framework import serializers
-from .models import Artist
+from .models import YourModel
 
-class ArtistSerializer(serializers.ModelSerializer):
+class YourModelSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Artist
+        model = YourModel
         fields = '__all__'
 ```
 
-```python
-# In core/views.py
-from rest_framework import viewsets
-from .models import Artist
-from .serializers import ArtistSerializer
+2. **Create views** in `core/views.py`:
 
-class ArtistViewSet(viewsets.ModelViewSet):
-    queryset = Artist.objects.all()
-    serializer_class = ArtistSerializer
+```python
+from rest_framework import viewsets
+from .models import YourModel
+from .serializers import YourModelSerializer
+
+class YourModelViewSet(viewsets.ModelViewSet):
+    queryset = YourModel.objects.all()
+    serializer_class = YourModelSerializer
 ```
+
+3. **Register URLs** in your urls.py
 
 ## 📚 Additional Resources
 
