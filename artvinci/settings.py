@@ -11,42 +11,59 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+import environ
+from datetime import timedelta
+
+# Initialiser django-environ
+env = environ.Env(
+    DEBUG=(bool, False),
+)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Lire le fichier .env
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-=**)wcf+f8zs$@+*qun^1+o2i!k0=hb-l!%3u0yn&pc1^g4=wh'
+SECRET_KEY = env('SECRET_KEY', default='django-insecure-=**)wcf+f8zs$@+*qun^1+o2i!k0=hb-l!%3u0yn&pc1^g4=wh')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DEBUG', default=True)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
 
 
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
+    # Django core apps (minimal setup for DRF and JWT)
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
+    'django.contrib.auth',  # Required by simplejwt
     'django.contrib.staticfiles',
+    
+    # Third party apps
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'cloudinary_storage',
+    'cloudinary',
+    'corsheaders',
+    
+    # Local apps
     'core',
+    'accounts',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
@@ -70,20 +87,35 @@ TEMPLATES = [
 WSGI_APPLICATION = 'artvinci.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+# ============================================================================
+# DATABASE CONFIGURATION - MongoDB ONLY (No SQLite)
+# ============================================================================
 
+# Dummy database config (required by Django but not used)
+# We use MongoEngine exclusively for all data storage
 DATABASES = {
     'default': {
-        'ENGINE': 'djongo',
-        'NAME': 'artvinci_db',
-        'ENFORCE_SCHEMA': False,
-        'CLIENT': {
-            'host': 'localhost',
-            'port': 27017,
-        }
+        'ENGINE': 'django.db.backends.dummy'
     }
 }
+
+# ============================================================================
+# MONGODB CONFIGURATION via MongoEngine
+# ============================================================================
+import mongoengine
+
+MONGO_DB_NAME = env('MONGO_DB_NAME', default='artvinci_db')
+MONGO_URI = env('MONGO_URI', default='mongodb://localhost:27017/')
+
+# Connect to MongoDB
+mongoengine.connect(
+    db=MONGO_DB_NAME,
+    host=MONGO_URI,
+    alias='default'
+)
+
+print(f"✅ Connected to MongoDB via MongoEngine: {MONGO_DB_NAME}")
+
 
 
 # Password validation
@@ -126,3 +158,129 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Note: We use MongoEngine for user management, not Django's User model
+# AUTH_USER_MODEL is not needed since we're using MongoDB exclusively
+
+# ============================================================================
+# REST FRAMEWORK & JWT CONFIGURATION
+# ============================================================================
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'accounts.authentication.MongoEngineJWTAuthentication',  # Custom JWT for MongoEngine
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.AllowAny',  # Changed to AllowAny since we handle auth manually
+    ),
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+    ),
+    'DEFAULT_PARSER_CLASSES': (
+        'rest_framework.parsers.JSONParser',
+        'rest_framework.parsers.FormParser',
+        'rest_framework.parsers.MultiPartParser',
+    ),
+    'EXCEPTION_HANDLER': 'rest_framework.views.exception_handler',
+}
+
+# Simple JWT Settings
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # 1 hour
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': False,  # Disabled - MongoDB doesn't support token blacklist
+    'BLACKLIST_AFTER_ROTATION': False,  # Disabled - requires SQL database
+    'UPDATE_LAST_LOGIN': True,
+    
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': env('JWT_SECRET', default=SECRET_KEY),
+    'VERIFYING_KEY': None,
+    'AUDIENCE': None,
+    'ISSUER': None,
+    
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+    
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
+}
+
+# ============================================================================
+# CLOUDINARY CONFIGURATION
+# ============================================================================
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': env('CLOUDINARY_CLOUD_NAME', default=''),
+    'API_KEY': env('CLOUDINARY_API_KEY', default=''),
+    'API_SECRET': env('CLOUDINARY_API_SECRET', default=''),
+}
+
+# Initialize Cloudinary
+import cloudinary
+cloudinary.config(
+    cloud_name=env('CLOUDINARY_CLOUD_NAME', default=''),
+    api_key=env('CLOUDINARY_API_KEY', default=''),
+    api_secret=env('CLOUDINARY_API_SECRET', default=''),
+    secure=True
+)
+
+# Media files
+MEDIA_URL = '/media/'
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+# ============================================================================
+# FRONTEND CONFIGURATION
+# ============================================================================
+
+FRONTEND_URL = env('FRONTEND_URL', default='http://localhost:5173')
+
+# ============================================================================
+# CORS CONFIGURATION
+# ============================================================================
+
+CORS_ALLOWED_ORIGINS = env.list(
+    'CORS_ALLOWED_ORIGINS',
+    default=['http://localhost:5173', 'http://127.0.0.1:5173']
+)
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
+# ============================================================================
+# EMAIL CONFIGURATION (Placeholders pour étapes futures)
+# ============================================================================
+
+EMAIL_BACKEND = env(
+    'EMAIL_BACKEND',
+    default='django.core.mail.backends.console.EmailBackend'  # Shows email in console for testing
+)
+EMAIL_HOST = env('EMAIL_HOST', default='smtp.gmail.com')
+EMAIL_PORT = env.int('EMAIL_PORT', default=587)
+EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
+EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='Marwaniwael88@gmail.com')
+EMAIL_TIMEOUT = 10  # Timeout in seconds
+
