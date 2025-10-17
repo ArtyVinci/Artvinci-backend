@@ -9,13 +9,20 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Configure Gemini
-genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+genai.configure(api_key=GEMINI_API_KEY)
 
 class EventAIService:
     """Service for AI-powered event features"""
     
     def __init__(self):
-        self.model = genai.GenerativeModel('gemini-1.5-flash')
+        # Initialize model with error handling
+        try:
+            self.model = genai.GenerativeModel('models/gemini-2.5-flash')
+            logger.info("✅ Gemini model initialized successfully")
+        except Exception as e:
+            logger.error(f"Failed to initialize Gemini model: {e}")
+            self.model = None
     
     def generate_event_description(self, title, category, location=None, additional_info=None):
         """

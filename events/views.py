@@ -741,3 +741,39 @@ class GenerateEventDescriptionView(APIView):
                 'error': 'Failed to generate description',
                 'message': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class ChatbotView(APIView):
+    """AI Chatbot for event discovery (visitors only)"""
+    permission_classes = [AllowAny]  # Allow unauthenticated users
+    
+    def post(self, request):
+        """Handle chatbot conversation"""
+        try:
+            from .chatbot_service import chatbot
+            
+            message = request.data.get('message', '').strip()
+            user_context = request.data.get('context', {})
+            
+            if not message:
+                return Response({
+                    'error': 'Message is required'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Check if this is a greeting request
+            if message.lower() == '__greeting__':
+                response = chatbot.get_greeting()
+            else:
+                # Generate AI response
+                logger.info(f"🤖 Chatbot received message: {message}")
+                response = chatbot.generate_response(message, user_context)
+            
+            return Response(response, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            logger.error(f"❌ Chatbot error: {str(e)}")
+            return Response({
+                'text': "Désolé, j'ai rencontré un problème technique. Pouvez-vous réessayer ?",
+                'events': [],
+                'has_events': False
+            }, status=status.HTTP_200_OK)  # Return 200 with error message for better UX

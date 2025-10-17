@@ -13,6 +13,7 @@ from .views import (
     MySubscriptionsView,
     EventAttendeesView,
     GenerateEventDescriptionView,
+    ChatbotView,
 )
 
 app_name = 'events'
@@ -26,6 +27,7 @@ urlpatterns = [
     
     # AI Features
     path('ai/generate-description/', GenerateEventDescriptionView.as_view(), name='generate-description'),
+    path('ai/chatbot/', ChatbotView.as_view(), name='chatbot'),
     
     # Event Subscriptions
     path('<slug:slug>/subscribe/', EventSubscribeView.as_view(), name='event-subscribe'),
