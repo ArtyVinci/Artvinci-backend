@@ -305,7 +305,7 @@ class EventSubscription(Document):
     # Subscription Details
     status = fields.StringField(choices=STATUS_CHOICES, default='pending')
     confirmation_code = fields.StringField(unique=True, required=True, max_length=32)
-    attendee_name = fields.StringField(required=True, max_length=200)  # Name of person attending
+    attendee_name = fields.StringField(max_length=200, default='')  # Name of person attending
     
     # Additional Information
     attendee_notes = fields.StringField(default='')  # Notes from the attendee
@@ -385,7 +385,9 @@ class EventSubscription(Document):
         self.cancelled_at = timezone.now()
         
         # Decrease event's attendee count if was previously confirmed/pending
-        if old_status in ['pending', 'confirmed']:
+        if old_status in ['pending', 'confirmed'] and self.event:
+            # Reload the event to get fresh data
+            self.event.reload()
             self.event.current_attendees = max(0, self.event.current_attendees - 1)
             self.event.save()
         
