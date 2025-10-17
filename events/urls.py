@@ -12,6 +12,7 @@ from .views import (
     EventUnsubscribeView,
     MySubscriptionsView,
     EventAttendeesView,
+    GenerateEventDescriptionView,
 )
 
 app_name = 'events'
@@ -22,6 +23,9 @@ urlpatterns = [
     path('my-events/', MyEventsView.as_view(), name='my-events'),
     path('<slug:slug>/', EventDetailView.as_view(), name='event-detail'),
     path('<slug:slug>/upload-images/', EventImageUploadView.as_view(), name='event-upload-images'),
+    
+    # AI Features
+    path('ai/generate-description/', GenerateEventDescriptionView.as_view(), name='generate-description'),
     
     # Event Subscriptions
     path('<slug:slug>/subscribe/', EventSubscribeView.as_view(), name='event-subscribe'),

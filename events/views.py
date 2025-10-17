@@ -21,6 +21,7 @@ from .serializers import (
     CreateSubscriptionSerializer
 )
 from accounts.models import User
+from .ai_service import ai_service
 
 logger = logging.getLogger(__name__)
 
@@ -691,5 +692,52 @@ class EventAttendeesView(APIView):
             logger.error(f"Error fetching attendees: {str(e)}")
             return Response({
                 'error': 'Failed to fetch attendees',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class GenerateEventDescriptionView(APIView):
+    """Generate AI-powered event description using Gemini"""
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        """Generate event description"""
+        try:
+            # Check if user is artist
+            if request.user.role != 'artist':
+                return Response({
+                    'error': 'Only artists can generate event descriptions'
+                }, status=status.HTTP_403_FORBIDDEN)
+            
+            # Get input data
+            title = request.data.get('title', '')
+            category = request.data.get('category', 'exhibition')
+            location = request.data.get('location', '')
+            additional_info = request.data.get('additional_info', '')
+            
+            # Validate required fields
+            if not title:
+                return Response({
+                    'error': 'Event title is required'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Generate description using AI
+            logger.info(f"🤖 Generating AI description for event: {title}")
+            description = ai_service.generate_event_description(
+                title=title,
+                category=category,
+                location=location,
+                additional_info=additional_info
+            )
+            
+            return Response({
+                'description': description,
+                'generated_by': 'Gemini AI'
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            logger.error(f"❌ Error generating event description: {str(e)}")
+            return Response({
+                'error': 'Failed to generate description',
                 'message': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
