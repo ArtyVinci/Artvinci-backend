@@ -1,4 +1,5 @@
 """MongoEngine models for a simple forum: categories, topics, replies."""
+from enum import Enum
 from mongoengine import Document, fields, CASCADE
 from django.utils import timezone
 from datetime import timedelta
@@ -6,6 +7,25 @@ from datetime import timedelta
 
 class ForumCategory(Document):
     name = fields.StringField(required=True, max_length=150, unique=True)
+    # category_type is a constrained string with a set of allowed values
+    class CategoryType(Enum):
+        GENERAL = 'general'
+        ANNOUNCEMENTS = 'announcements'
+        HELP = 'help'
+        TUTORIALS = 'tutorials'
+        SHOWCASE = 'showcase'
+        EVENTS = 'events'
+        OFFTOPIC = 'offtopic'
+        FEEDBACK = 'feedback'
+        JOBS = 'jobs'
+        MODERATION = 'moderation'
+
+    category_type = fields.StringField(
+        choices=[c.value for c in CategoryType],
+        default=CategoryType.GENERAL.value,
+        required=True,
+        max_length=50,
+    )
     description = fields.StringField(default='')
     created_at = fields.DateTimeField(default=timezone.now)
 
@@ -21,6 +41,7 @@ class ForumCategory(Document):
         return {
             'id': str(self.id),
             'name': self.name,
+            'type': self.category_type,
             'description': self.description,
             'created_at': self.created_at.isoformat() if self.created_at else None,
         }
