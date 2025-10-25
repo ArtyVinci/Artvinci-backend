@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'core',
     'accounts',
     'events',
+    'forum',
 ]
 
 MIDDLEWARE = [
