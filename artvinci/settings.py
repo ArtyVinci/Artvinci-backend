@@ -36,7 +36,9 @@ SECRET_KEY = env('SECRET_KEY', default='django-insecure-=**)wcf+f8zs$@+*qun^1+o2
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG', default=True)
 
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
+
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1', 'testserver'])
+
 
 
 # Application definition
@@ -57,8 +59,10 @@ INSTALLED_APPS = [
     # Local apps
     'core',
     'accounts',
+
     'events',
     'forum',
+
 ]
 
 MIDDLEWARE = [
@@ -285,4 +289,45 @@ EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='Marwaniwael88@gmail.com')
 EMAIL_TIMEOUT = 10  # Timeout in seconds
+
+
+# ============================================================================
+# LOGGING CONFIGURATION (pour debugging) - DÉSACTIVÉ TEMPORAIREMENT
+# ============================================================================
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'formatters': {
+#         'verbose': {
+#             'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+#             'style': '{',
+#         },
+#         'simple': {
+#             'format': '{levelname} {message}',
+#             'style': '{',
+#         },
+#     },
+#     'handlers': {
+#         'console': {
+#             'class': 'logging.StreamHandler',
+#             'formatter': 'verbose'
+#         },
+#     },
+#     'root': {
+#         'handlers': ['console'],
+#         'level': 'INFO',
+#     },
+#     'loggers': {
+#         'accounts': {
+#             'handlers': ['console'],
+#             'level': 'DEBUG',
+#             'propagate': False,
+#         },
+#         'django.request': {
+#             'handlers': ['console'],
+#             'level': 'DEBUG',
+#             'propagate': False,
+#         },
+#     },
+# }
 

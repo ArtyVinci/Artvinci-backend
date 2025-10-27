@@ -28,6 +28,13 @@ class User(Document):
     role = fields.StringField(max_length=10, choices=ROLE_CHOICES, default='visitor')
     bio = fields.StringField(default='')
     profile_image = fields.StringField(default=None, null=True)  # Cloudinary URL
+
+    profile_picture = fields.StringField(default=None, null=True)  # For OAuth providers
+    
+    # Authentication provider fields
+    auth_provider = fields.StringField(max_length=20, default='email', choices=['email', 'google'])
+    google_id = fields.StringField(default=None, null=True)  # Google user ID
+
     
     # Account status
     is_active = fields.BooleanField(default=True)
@@ -39,8 +46,10 @@ class User(Document):
     date_joined = fields.DateTimeField(default=timezone.now)
     last_login = fields.DateTimeField(default=None, null=True)
     
-    # Reserved for future features
-    face_encoding = fields.BinaryField(default=None, null=True)
+
+    # Face recognition - stores face embedding as list of floats
+    face_encoding = fields.ListField(fields.FloatField(), default=None, null=True)
+
     
     meta = {
         'collection': 'users',
@@ -84,6 +93,7 @@ class User(Document):
     
     def to_dict(self):
         """Convert document to dictionary for serialization."""
+      
         data = {
             'id': str(self.id),
             'username': self.username,
@@ -97,8 +107,10 @@ class User(Document):
             'is_verified': self.is_verified,
             'date_joined': self.date_joined.isoformat() if self.date_joined else None,
             'last_login': self.last_login.isoformat() if self.last_login else None,
+            'face_registered': self.face_encoding is not None and len(self.face_encoding) > 0,
         }
-        # compute lightweight stats where possible
+
+            # compute lightweight stats where possible
         try:
             # avoid hard import at module level to prevent circular imports
             from forum.models import ForumTopic, ForumReply
@@ -120,8 +132,6 @@ class User(Document):
             data['member_title'] = 'Member'
 
         return data
-
-
 class EmailVerificationOTP(Document):
     """
     MongoEngine Document for storing OTP codes for email verification.
