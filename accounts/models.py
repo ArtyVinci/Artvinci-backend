@@ -84,7 +84,7 @@ class User(Document):
     
     def to_dict(self):
         """Convert document to dictionary for serialization."""
-        return {
+        data = {
             'id': str(self.id),
             'username': self.username,
             'email': self.email,
@@ -98,6 +98,28 @@ class User(Document):
             'date_joined': self.date_joined.isoformat() if self.date_joined else None,
             'last_login': self.last_login.isoformat() if self.last_login else None,
         }
+        # compute lightweight stats where possible
+        try:
+            # avoid hard import at module level to prevent circular imports
+            from forum.models import ForumTopic, ForumReply
+            data['topics_count'] = ForumTopic.objects(author=self).count()
+            data['replies_count'] = ForumReply.objects(author=self).count()
+        except Exception:
+            data['topics_count'] = 0
+            data['replies_count'] = 0
+
+        # member title based on activity
+        try:
+            if data['topics_count'] + data['replies_count'] > 50:
+                data['member_title'] = 'Veteran'
+            elif data['topics_count'] + data['replies_count'] > 10:
+                data['member_title'] = 'Active Member'
+            else:
+                data['member_title'] = 'New Member'
+        except Exception:
+            data['member_title'] = 'Member'
+
+        return data
 
 
 class EmailVerificationOTP(Document):

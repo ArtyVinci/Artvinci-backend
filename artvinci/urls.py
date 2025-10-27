@@ -7,4 +7,5 @@ urlpatterns = [
     # API endpoints
     path('api/auth/', include('accounts.urls', namespace='accounts')),
     path('api/events/', include('events.urls', namespace='events')),
+    path('api/forum/', include('forum.urls', namespace='forum')),
 ]
