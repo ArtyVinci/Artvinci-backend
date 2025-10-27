@@ -13,6 +13,7 @@ from django.conf import settings
 from django.utils import timezone
 from mongoengine.errors import ValidationError, NotUniqueError, DoesNotExist
 import logging
+
 import os
 import base64
 import io
@@ -26,6 +27,7 @@ import numpy as np
 from deepface import DeepFace
 import tempfile
 
+
 from .models import User, EmailVerificationOTP, PasswordResetToken
 from .serializers import (
     RegisterSerializer,
@@ -37,6 +39,7 @@ from .serializers import (
 )
 
 logger = logging.getLogger(__name__)
+
 
 
 def extract_face_encoding_from_url(image_url, user_id=None):
@@ -128,6 +131,7 @@ def compare_face_encodings(encoding1, encoding2, threshold=0.6):
     except Exception as e:
         logger.error(f"Face comparison error: {str(e)}")
         return False
+
 
 
 class RegisterView(APIView):
@@ -434,6 +438,7 @@ class UserProfileView(APIView):
                     user.profile_image = upload_result['secure_url']
                     logger.info(f"Profile image uploaded successfully: {user.profile_image}")
                     
+
                     # Extract face encoding from uploaded image
                     try:
                         face_encoding = extract_face_encoding_from_url(user.profile_image, str(user.id))
@@ -455,6 +460,7 @@ class UserProfileView(APIView):
                         logger.error(f"Face encoding extraction failed: {str(face_error)}")
                         # Continue without failing the profile update
                     
+
                 except Exception as upload_error:
                     logger.error(f"Image upload error: {str(upload_error)}")
                     # Continue with other updates even if image upload fails
@@ -631,6 +637,7 @@ class ResetPasswordView(APIView):
             return Response({
                 'error': 'An unexpected error occurred. Please try again later.'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
 class GoogleLoginInitiateView(APIView):
@@ -1400,3 +1407,4 @@ class FaceDebugView(APIView):
             return Response({
                 'error': 'Face comparison test failed'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+

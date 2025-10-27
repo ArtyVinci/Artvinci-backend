@@ -28,11 +28,13 @@ class User(Document):
     role = fields.StringField(max_length=10, choices=ROLE_CHOICES, default='visitor')
     bio = fields.StringField(default='')
     profile_image = fields.StringField(default=None, null=True)  # Cloudinary URL
+
     profile_picture = fields.StringField(default=None, null=True)  # For OAuth providers
     
     # Authentication provider fields
     auth_provider = fields.StringField(max_length=20, default='email', choices=['email', 'google'])
     google_id = fields.StringField(default=None, null=True)  # Google user ID
+
     
     # Account status
     is_active = fields.BooleanField(default=True)
@@ -44,8 +46,10 @@ class User(Document):
     date_joined = fields.DateTimeField(default=timezone.now)
     last_login = fields.DateTimeField(default=None, null=True)
     
+
     # Face recognition - stores face embedding as list of floats
     face_encoding = fields.ListField(fields.FloatField(), default=None, null=True)
+
     
     meta = {
         'collection': 'users',
@@ -89,7 +93,8 @@ class User(Document):
     
     def to_dict(self):
         """Convert document to dictionary for serialization."""
-        return {
+      
+        data = {
             'id': str(self.id),
             'username': self.username,
             'email': self.email,
@@ -105,7 +110,28 @@ class User(Document):
             'face_registered': self.face_encoding is not None and len(self.face_encoding) > 0,
         }
 
+            # compute lightweight stats where possible
+        try:
+            # avoid hard import at module level to prevent circular imports
+            from forum.models import ForumTopic, ForumReply
+            data['topics_count'] = ForumTopic.objects(author=self).count()
+            data['replies_count'] = ForumReply.objects(author=self).count()
+        except Exception:
+            data['topics_count'] = 0
+            data['replies_count'] = 0
 
+        # member title based on activity
+        try:
+            if data['topics_count'] + data['replies_count'] > 50:
+                data['member_title'] = 'Veteran'
+            elif data['topics_count'] + data['replies_count'] > 10:
+                data['member_title'] = 'Active Member'
+            else:
+                data['member_title'] = 'New Member'
+        except Exception:
+            data['member_title'] = 'Member'
+
+        return data
 class EmailVerificationOTP(Document):
     """
     MongoEngine Document for storing OTP codes for email verification.

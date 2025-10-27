@@ -3,11 +3,14 @@ from rest_framework_simplejwt.views import TokenRefreshView
 from .views import (
     RegisterView,
     LoginView,
+
     LogoutView,
+
     SendOTPView,
     VerifyOTPView,
     UserProfileView,
     ForgotPasswordView,
+
     ResetPasswordView,
     GoogleLoginInitiateView,
     GoogleCallbackView,
@@ -15,6 +18,7 @@ from .views import (
     RegisterFaceFromProfileView,
     FaceLoginView,
     FaceDebugView
+
 )
 
 app_name = 'accounts'
@@ -23,6 +27,7 @@ urlpatterns = [
     # Authentication endpoints
     path('register/', RegisterView.as_view(), name='register'),
     path('login/', LoginView.as_view(), name='login'),
+
     path('logout/', LogoutView.as_view(), name='logout'),
     
     # Google OAuth endpoints
@@ -34,6 +39,7 @@ urlpatterns = [
     path('face/register-from-profile/', RegisterFaceFromProfileView.as_view(), name='face_register_from_profile'),
     path('face/login/', FaceLoginView.as_view(), name='face_login'),
     path('face/debug/', FaceDebugView.as_view(), name='face_debug'),
+
     
     # OTP verification endpoints
     path('send-otp/', SendOTPView.as_view(), name='send_otp'),
