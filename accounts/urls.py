@@ -17,7 +17,10 @@ from .views import (
     RegisterFaceView,
     RegisterFaceFromProfileView,
     FaceLoginView,
-    FaceDebugView
+    FaceDebugView,
+    GenerateProfileBioView,
+    AnalyzeArtworkView,
+    GenerateRecommendationsView
 
 )
 
@@ -36,10 +39,13 @@ urlpatterns = [
     
     # Face Recognition endpoints
     path('face/register/', RegisterFaceView.as_view(), name='face_register'),
-    path('face/register-from-profile/', RegisterFaceFromProfileView.as_view(), name='face_register_from_profile'),
     path('face/login/', FaceLoginView.as_view(), name='face_login'),
     path('face/debug/', FaceDebugView.as_view(), name='face_debug'),
 
+    # AI Service endpoints
+    path('ai/generate-bio/', GenerateProfileBioView.as_view(), name='generate_bio'),
+    path('ai/analyze-artwork/', AnalyzeArtworkView.as_view(), name='analyze_artwork'),
+    path('ai/recommendations/', GenerateRecommendationsView.as_view(), name='recommendations'),
     
     # OTP verification endpoints
     path('send-otp/', SendOTPView.as_view(), name='send_otp'),

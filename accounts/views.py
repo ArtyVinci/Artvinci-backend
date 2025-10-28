@@ -37,6 +37,7 @@ from .serializers import (
     SendOTPSerializer,
     get_tokens_for_user
 )
+from .ai_service import user_ai_service
 
 logger = logging.getLogger(__name__)
 
@@ -1406,5 +1407,91 @@ class FaceDebugView(APIView):
             logger.error(f"Face debug test error: {str(e)}")
             return Response({
                 'error': 'Face comparison test failed'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class GenerateProfileBioView(APIView):
+    """
+    Generate AI-powered profile bio for the authenticated user
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            user = request.user
+
+            # Generate bio using AI service
+            bio = user_ai_service.generate_profile_bio(user)
+
+            return Response({
+                'message': 'Profile bio generated successfully',
+                'bio': bio
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            logger.error(f"Generate profile bio error: {str(e)}")
+            return Response({
+                'error': 'Failed to generate profile bio. Please try again.'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class AnalyzeArtworkView(APIView):
+    """
+    Analyze user's artwork using AI and provide enhanced description, tags, and style
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            user = request.user
+            artwork_title = request.data.get('title', '').strip()
+            artwork_description = request.data.get('description', '').strip()
+
+            if not artwork_title:
+                return Response({
+                    'error': 'Artwork title is required'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            # Analyze artwork using AI service
+            analysis = user_ai_service.analyze_user_artwork(
+                user=user,
+                artwork_title=artwork_title,
+                artwork_description=artwork_description
+            )
+
+            return Response({
+                'message': 'Artwork analyzed successfully',
+                'analysis': analysis
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            logger.error(f"Analyze artwork error: {str(e)}")
+            return Response({
+                'error': 'Failed to analyze artwork. Please try again.'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class GenerateRecommendationsView(APIView):
+    """
+    Generate personalized artwork recommendations based on user's profile
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            user = request.user
+
+            # Generate recommendations using AI service
+            recommendations = user_ai_service.generate_personalized_recommendations(user)
+
+            return Response({
+                'message': 'Recommendations generated successfully',
+                'recommendations': recommendations
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            logger.error(f"Generate recommendations error: {str(e)}")
+            return Response({
+                'error': 'Failed to generate recommendations. Please try again.'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
