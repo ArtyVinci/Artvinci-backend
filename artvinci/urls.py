@@ -2,8 +2,12 @@
 URL configuration for artvinci project.
 """
 from django.urls import path, include
+from . import views
 
 urlpatterns = [
+    # Health check for Render
+    path('api/health/', views.health_check, name='health_check'),
+
     # API endpoints
     path('api/auth/', include('accounts.urls', namespace='accounts')),
     path('api/artworks/', include('artworks.urls', namespace='artworks')),
