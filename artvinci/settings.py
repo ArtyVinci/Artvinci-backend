@@ -119,7 +119,9 @@ MONGO_URI = env('MONGO_URI', default='mongodb://localhost:27017/')
 mongoengine.connect(
     db=MONGO_DB_NAME,
     host=MONGO_URI,
-    alias='default'
+    alias='default',
+    ssl=True,
+    ssl_cert_reqs='CERT_NONE'
 )
 
 print(f"✅ Connected to MongoDB via MongoEngine: {MONGO_DB_NAME}")
