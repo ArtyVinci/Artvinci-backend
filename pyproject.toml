@@ -1,0 +1,41 @@
+[tool.poetry]
+name = "artvinci-backend"
+version = "0.1.0"
+description = "Artvinci Backend API"
+authors = ["ArtyVinci <aymen.jallouli@esprit.tn>"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+Django = "4.2.7"
+mongoengine = "0.28.2"
+pymongo = "4.6.1"
+djangorestframework = "3.14.0"
+djangorestframework-simplejwt = "5.3.0"
+PyJWT = "2.8.0"
+cloudinary = "1.41.0"
+django-cloudinary-storage = "0.3.0"
+Pillow = "10.4.0"
+python-dotenv = "1.1.1"
+django-environ = "0.11.2"
+django-cors-headers = "3.14.0"
+deepface = "0.0.95"
+tensorflow-cpu = "2.13.1"
+opencv-python = "4.10.0.84"
+numpy = ">=1.23.0"
+google-auth = "2.29.0"
+google-auth-oauthlib = "1.2.0"
+google-auth-httplib2 = "0.2.0"
+python-dateutil = "2.9.0"
+certifi = "2024.8.30"
+urllib3 = "2.2.3"
+requests = "2.31.0"
+six = "1.16.0"
+google-generativeai = "0.8.3"
+asgiref = "3.7.2"
+pytz = "2024.1"
+
+[tool.poetry.group.dev.dependencies]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
