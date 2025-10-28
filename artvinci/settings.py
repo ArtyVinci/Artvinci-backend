@@ -120,8 +120,7 @@ mongoengine.connect(
     db=MONGO_DB_NAME,
     host=MONGO_URI,
     alias='default',
-    ssl=True,
-    ssl_cert_reqs='CERT_NONE'
+    ssl=True
 )
 
 print(f"✅ Connected to MongoDB via MongoEngine: {MONGO_DB_NAME}")
