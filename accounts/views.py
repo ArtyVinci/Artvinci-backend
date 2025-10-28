@@ -23,9 +23,12 @@ from google.auth.transport import requests as google_requests
 from google_auth_oauthlib.flow import Flow
 from urllib.parse import urlencode
 from PIL import Image
-import numpy as np
-from deepface import DeepFace
+# import numpy as np
+# from deepface import DeepFace
 import tempfile
+
+# Face recognition temporarily disabled due to Python 3.14 compatibility issues
+# TensorFlow doesn't support Python 3.14 yet - use Python 3.10-3.11 for face recognition
 
 
 from .models import User, EmailVerificationOTP, PasswordResetToken
