@@ -23,8 +23,8 @@ from google.auth.transport import requests as google_requests
 from google_auth_oauthlib.flow import Flow
 from urllib.parse import urlencode
 from PIL import Image
- import numpy as np
- from deepface import DeepFace
+import numpy as np
+from deepface import DeepFace
 import tempfile
 
 # Face recognition temporarily disabled due to Python 3.14 compatibility issues
@@ -1497,5 +1497,6 @@ class GenerateRecommendationsView(APIView):
             return Response({
                 'error': 'Failed to generate recommendations. Please try again.'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
