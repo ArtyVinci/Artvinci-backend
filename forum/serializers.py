@@ -1,11 +1,14 @@
 """Serializers for forum documents (simple representation-only serializers)."""
 from rest_framework import serializers
 from .models import ForumCategory, ForumTopic, ForumReply
+from .models import ForumCategory as _ForumCategory
 
 
 class ForumCategorySerializer(serializers.Serializer):
     id = serializers.CharField(read_only=True)
     name = serializers.CharField()
+    # expose the category type (enum-backed string)
+    type = serializers.CharField(source='category_type', required=False)
     description = serializers.CharField(allow_blank=True, required=False)
     created_at = serializers.DateTimeField(read_only=True)
 
@@ -43,3 +46,8 @@ class ForumTopicSerializer(serializers.Serializer):
             # include replies by default in detailed representation
             return instance.to_dict(include_replies=True)
         return super().to_representation(instance)
+
+
+class SuggestReplySerializer(serializers.Serializer):
+    tone = serializers.ChoiceField(choices=[('friendly', 'friendly'), ('formal', 'formal'), ('concise', 'concise')], default='friendly', required=False)
+    max_length = serializers.IntegerField(default=400, required=False)
