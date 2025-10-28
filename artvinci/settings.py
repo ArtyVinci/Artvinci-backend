@@ -62,6 +62,8 @@ INSTALLED_APPS = [
     'artworks',
     'events',
     'forum',
+    'ventes',  # Sales Management
+    'gallery',  # Stable-Diffusion gallery app (copied in)
 
 ]
 
@@ -290,9 +292,15 @@ EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='Marwaniwael88@gmail.com')
 EMAIL_TIMEOUT = 10  # Timeout in seconds
 
+# ============================================================================
+# STRIPE PAYMENT CONFIGURATION
+# ============================================================================
+STRIPE_PUBLISHABLE_KEY = env('STRIPE_PUBLISHABLE_KEY', default='')
+STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY', default='')
 
 
-
+# ============================================================================
+# LOGGING CONFIGURATION (pour debugging)
 # ============================================================================
 LOGGING = {
     'version': 1,
