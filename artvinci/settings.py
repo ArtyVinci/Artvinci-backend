@@ -291,8 +291,8 @@ DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='Marwaniwael88@gmail.com'
 EMAIL_TIMEOUT = 10  # Timeout in seconds
 
 
-# ============================================================================
-# LOGGING CONFIGURATION (pour debugging)
+
+
 # ============================================================================
 LOGGING = {
     'version': 1,
@@ -317,17 +317,23 @@ LOGGING = {
         'handlers': ['console'],
         'level': 'INFO',
     },
-    'loggers': {
-        'artworks': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': False,
-        },
-        'django.request': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': False,
-        },
+ 'loggers': {
+    'accounts': {
+        'handlers': ['console'],
+        'level': 'DEBUG',
+        'propagate': False,
     },
+    'artworks': {
+        'handlers': ['console'],
+        'level': 'DEBUG',
+        'propagate': False,
+    },
+    'django.request': {
+        'handlers': ['console'],
+        'level': 'DEBUG',
+        'propagate': False,
+    },
+},
+
 }
 
