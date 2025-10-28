@@ -14,7 +14,6 @@ from pathlib import Path
 import os
 import environ
 from datetime import timedelta
-import ssl
 
 # Initialiser django-environ
 env = environ.Env(
@@ -120,8 +119,7 @@ MONGO_URI = env('MONGO_URI', default='mongodb://localhost:27017/')
 mongoengine.connect(
     db=MONGO_DB_NAME,
     host=MONGO_URI,
-    alias='default',
-    mongo_client_kwargs={'tlsAllowInvalidCertificates': True}
+    alias='default'
 )
 
 print(f"✅ Connected to MongoDB via MongoEngine: {MONGO_DB_NAME}")
@@ -346,4 +344,3 @@ LOGGING = {
 },
 
 }
-

@@ -17,7 +17,7 @@ class Command(BaseCommand):
             return
 
         try:
-            client = pymongo.MongoClient(mongo_uri, tlsAllowInvalidCertificates=True)
+            client = pymongo.MongoClient(mongo_uri)
             db = client[db_name]
 
             # Create a simple seed document in a collection called `seed_collection`.

@@ -24,9 +24,7 @@ from google_auth_oauthlib.flow import Flow
 from urllib.parse import urlencode
 from PIL import Image
 # import numpy as np
-import numpy as np
 # from deepface import DeepFace
-from deepface import DeepFace
 import tempfile
 
 # Face recognition temporarily disabled due to Python 3.14 compatibility issues
